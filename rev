@@ -1,0 +1,142 @@
+import random
+import time
+
+class Pokemon:
+    def __init__(self, name: str, initial_power: int, current_power: int):
+        self.name = name
+        self.initial_power = initial_power
+        self.current_power = current_power
+
+    def add_power(self, random_variation_buff: int):
+        self.current_power += random_variation_buff
+        return self.current_power
+
+    def dead(self):
+        self.current_power = 0
+
+pokemon_hashmap = {
+    "pikachu": 50,
+    "charmander": 55,
+    "bulbasaur": 60,
+    "squirtle": 58,
+    "jigglypuff": 45,
+    "eevee": 52,
+    "snorlax": 80,
+    "gengar": 70,
+    "machamp": 75,
+    "mewtwo": 90,
+}
+user_pokemon_list = []
+enemy_pokemon_list = []
+for pokemon in pokemon_hashmap:
+    user_pokemon_list.append(Pokemon(pokemon, pokemon_hashmap[pokemon], pokemon_hashmap[pokemon]))
+    enemy_pokemon_list.append(Pokemon(pokemon, pokemon_hashmap[pokemon], pokemon_hashmap[pokemon]))
+
+def remove_pokemon(name: str, pokemon_list: list):
+    i = 0
+    for pokemon_object in pokemon_list:
+        if pokemon_object.name == name:
+            pokemon_list.pop(i)
+        i += 1
+
+select_character = True
+win = 0
+lost = 0
+
+print("")
+while True:
+    if select_character:
+        print("your available pokemon")
+        for pokemon_object in user_pokemon_list:
+            print(f"Name: {pokemon_object.name} ---------- Power: {pokemon_object.current_power}")
+        user_pokemon = input("choose your pokemon: ").lower()
+        print("")
+
+    if user_pokemon in pokemon_hashmap.keys():
+
+        for pokemon_object in user_pokemon_list:
+            if user_pokemon == pokemon_object.name:
+
+                # attach your chosen pokemon to the object
+                user_pokemon_object = pokemon_object
+
+        user_random_variation = random.choice(["weak", "strong"])
+        if user_random_variation == "weak":
+            user_random_variation_buff = random.choice(list(range(1, 21)))
+            print(user_random_variation_buff)
+        else:
+            user_random_variation_buff = random.choice(list(range(21, 41)))
+
+        print(f"you selected a {user_random_variation} {user_pokemon_object.name}")
+        print(f"Base Power: {user_pokemon_object.initial_power}")
+        print(f"Random Variation Buff: {user_random_variation_buff}")
+        print(f"Current Power: {user_pokemon_object.add_power(user_random_variation_buff)}")
+        print("")
+
+        # random enemy choice pokemon
+        enemy_pokemon_object = random.choice(enemy_pokemon_list)
+        enemy_random_variation = random.choice(["weak", "strong"])
+        if enemy_random_variation == "weak":
+            enemy_random_variation_buff = random.choice(list(range(10, 21)))
+        else:
+            enemy_random_variation_buff = random.choice(list(range(21, 31)))
+
+        print(f"Enemy selected a {enemy_random_variation} {enemy_pokemon_object.name}")
+        print(f"Base Power: {enemy_pokemon_object.initial_power}")
+        print(f"Random Variation Buff: {enemy_random_variation_buff}")
+        print(f"Current Power: {enemy_pokemon_object.add_power(enemy_random_variation_buff)}")
+        print("")
+
+        print ("Battle will start in :")
+        time.sleep(1)
+        print ("3")
+        time.sleep(1)
+        print ("2")
+        time.sleep(1)
+        print ("1")
+        print("")
+
+        # Battle starts
+        if user_pokemon_object.current_power == enemy_pokemon_object.current_power:
+            print ("its a tie!")
+            print("")
+
+        elif user_pokemon_object.current_power > enemy_pokemon_object.current_power:
+            user_pokemon_object.add_power(enemy_pokemon_object.current_power)
+            enemy_pokemon_object.dead()
+            remove_pokemon(enemy_pokemon_object.name, enemy_pokemon_list)
+            print("you win")
+            print("")
+
+            if len(enemy_pokemon_list) == 0:
+                print('Enemy ran out of pokemon')
+                print('Congratulations, you won the pokemon battle')
+
+            while True:
+                out = input("press c to continue the battle or n for a new pokemon character selection: ").lower()
+                if out == "c":
+                    select_character = False
+                    break
+                if out == "n":
+                    select_character = True
+                    break
+                else:
+                    print("not a valid keyword")
+
+        else:
+            enemy_pokemon_object.add_power(user_pokemon_object.current_power)
+            user_pokemon_object.dead()
+            remove_pokemon(user_pokemon_object.name, user_pokemon_list)
+            print("you lost")
+            print("")
+
+            if len(user_pokemon_list) == 0:
+                print('U ran out of pokemon')
+                print('U lost the pokemon battle')
+
+            # u lost, automatically u need to choose new pokemon
+
+    else:
+        print ("Invalid input")
+        print (user_pokemon, "not in the pokemon list")
+
