@@ -1,6 +1,5 @@
 import random
 import time
-import sys
 from tabulate import tabulate # type: ignore
 from termcolor import colored # type: ignore
 
@@ -44,9 +43,9 @@ for pokemon in pokemon_hashmap:
 def loading_animation():
     print ("Loading", end="")
     for _ in range(3):  
-        print(".", end="")
+        print(".", end="", flush=True)
         time.sleep(1)
-    print("")
+    print("\n")
 
 history = []
 
@@ -54,7 +53,19 @@ select_character = True
 win = 0
 lose = 0
 battle_number = 0
-print("")
+
+print (f"""
+Welcome to the {colored('ultimate Pokémon challenge', 'yellow')}! 
+Here’s your mission: choose a Pokémon to compete in a high-stakes game of chance and strategy. 
+Each Pokémon will receive a random variation that could either double its power or halve it.
+
+If you’re feeling daring, pick a Pokémon with a higher base power for the chance at even greater rewards. 
+But beware, the risk is high! For a safer bet, opt for a Pokémon with lower base power to minimize potential losses.
+
+Are you ready to test your luck and strategy? Choose your Pokémon wisely and let the game begin!\n""")
+
+loading_animation()
+
 while True:
     
     # checks if the user chose to select a new pokemon
@@ -64,7 +75,7 @@ while True:
         table_data = [[colored(pokemon_object.name.capitalize(), "yellow"), colored(pokemon_object.current_power, "blue"), colored("Alive", "green") if pokemon_object.current_power != 0 else colored("Dead", "red")] for pokemon_object in user_pokemon_list]
         
         # Print the table with headers
-        print(tabulate(table_data, headers=[colored("Name", attrs=["bold"]), colored("Current Power", attrs=["bold"]), colored("State", attrs=["bold"])], tablefmt="grid"))
+        print(tabulate(table_data, headers=[colored("Name", attrs=["bold"]), colored("Current Power", attrs=["bold"]), colored("State", attrs=["bold"])], tablefmt="pretty"))
         user_pokemon = input(colored("Choose your pokemon: ", "yellow", attrs=["bold"])).lower()
         print("")
 
@@ -131,7 +142,7 @@ while True:
                         print (colored("thank you for playing!", "green", attrs=["bold"]))
                         exit()
                     if next == "m":
-                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="grid"))
+                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="pretty"))
                         print("")
                     else:
                         print(colored("Not a valid key", "red"))
@@ -168,7 +179,7 @@ while True:
                         print (colored("thank you for playing!", "green", attrs=["bold"]))
                         exit()
                     if next == "m":
-                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="grid"))
+                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="pretty"))
                         print("")
                     else:
                         print(colored("Not a valid key", "red"))
@@ -199,7 +210,7 @@ while True:
                         print (colored("thank you for playing!", "green", attrs=["bold"]))
                         exit()
                     if next == "m":
-                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="grid"))
+                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="pretty"))
                         print("")
                     else:
                         print(colored("Not a valid key", "red"))
