@@ -1,8 +1,9 @@
 import random
 import time
-from tabulate import tabulate # type: ignore
-from termcolor import colored # type: ignore
+from tabulate import tabulate
+from termcolor import colored
 
+# pokemon's attributes and methods (the blueprint of each pokemons in the game)
 class Pokemon:
     def __init__(self, name: str, initial_power: int, current_power: int):
         self.name = name
@@ -36,6 +37,8 @@ pokemon_hashmap = {
 }
 user_pokemon_list = []
 enemy_pokemon_list = []
+
+# created every pokemon from the pokemon_hashmap and put it in a list
 for pokemon in pokemon_hashmap:
     user_pokemon_list.append(Pokemon(pokemon, pokemon_hashmap[pokemon], pokemon_hashmap[pokemon]))
     enemy_pokemon_list.append(Pokemon(pokemon, pokemon_hashmap[pokemon], pokemon_hashmap[pokemon]))
@@ -47,8 +50,8 @@ def loading_animation():
         time.sleep(1)
     print("\n")
 
+# variable initialization
 history = []
-
 select_character = True
 win = 0
 lose = 0
@@ -83,14 +86,15 @@ while True:
     if user_pokemon in pokemon_hashmap.keys():
 
         for pokemon_object in user_pokemon_list:
+            # finds the chosen pokemon using it's name attribute
             if user_pokemon == pokemon_object.name:
-
-                # attach your chosen pokemon to the object
+                # attached the chosen pokemon to the object
                 user_pokemon_object = pokemon_object
         
         # checks if the chosen pokemon is not dead
         if user_pokemon_object.current_power != 0:
-                
+
+            # user pokemon (random variation)   
             user_random_variation = random.choice(["weak", "strong"])
             print(f"you selected a {colored(user_random_variation, attrs=['bold', 'underline'])} {colored(user_pokemon_object.name.capitalize(), 'yellow', attrs=['bold'])}")
             
@@ -104,7 +108,7 @@ while True:
             print("")
             time.sleep(1)
 
-            # random enemy choice pokemon
+            # enemy pokemon (random pokemon and variation)
             enemy_pokemon_object = random.choice(enemy_pokemon_list)
             enemy_random_variation = random.choice(["weak", "strong"])
             
@@ -123,6 +127,7 @@ while True:
             # Battle starts
             battle_number += 1
             
+            # if the battle comes out to be TIE
             if user_pokemon_object.current_power == enemy_pokemon_object.current_power:
                 history.append([battle_number, colored(user_pokemon_object.name.capitalize(), "yellow"), colored(user_pokemon_object.current_power, "blue"), colored(enemy_pokemon_object.name.capitalize(), "yellow"), colored(enemy_pokemon_object.current_power, "blue"), colored("Tie", 'yellow')])
                 print ("its a tie!")
@@ -148,6 +153,7 @@ while True:
                         print(colored("Not a valid key", "red"))
                         print("")
 
+            # if the user won
             elif user_pokemon_object.current_power > enemy_pokemon_object.current_power:
                 
                 # backend methods and functions of the user winning
@@ -185,6 +191,7 @@ while True:
                         print(colored("Not a valid key", "red"))
                         print("")
 
+            # if the user lose
             else:
                 history.append([battle_number, colored(user_pokemon_object.name.capitalize(), "yellow"), colored(user_pokemon_object.current_power, "blue"), colored(enemy_pokemon_object.name.capitalize(), "yellow"), colored(enemy_pokemon_object.current_power, "blue"), colored("Computer Wins", 'red')])
                 enemy_pokemon_object.add_power(user_pokemon_object.current_power)
@@ -218,11 +225,9 @@ while True:
     
         else:
             print (f"{colored(user_pokemon_object.name.capitalize(), 'yellow')} is already dead, please choose another Pokemon")
-
     else:
-        
         if user_pokemon == "":
             print("No selection made")
         else:
             print ("Invalid Invalid input selection")
-            print ({colored(user_pokemon, 'yellow')}, "not in the pokemon list")
+            print ({colored(user_pokemon, 'yellow')}, "not in the pokemon list")    
