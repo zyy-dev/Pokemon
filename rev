@@ -1,5 +1,8 @@
 import random
 import time
+import sys
+from tabulate import tabulate # type: ignore
+from termcolor import colored # type: ignore
 
 class Pokemon:
     def __init__(self, name: str, initial_power: int, current_power: int):
@@ -7,9 +10,15 @@ class Pokemon:
         self.initial_power = initial_power
         self.current_power = current_power
 
-    def add_power(self, random_variation_buff: int):
-        self.current_power += random_variation_buff
+    def calculate_power(self, random_variation: str):
+        if random_variation == "weak":
+            self.current_power *= 0.5
+        if random_variation == "strong":
+            self.current_power *= 2
         return self.current_power
+    
+    def add_power(self, addend: int):
+        self.current_power += addend
 
     def dead(self):
         self.current_power = 0
@@ -31,27 +40,35 @@ enemy_pokemon_list = []
 for pokemon in pokemon_hashmap:
     user_pokemon_list.append(Pokemon(pokemon, pokemon_hashmap[pokemon], pokemon_hashmap[pokemon]))
     enemy_pokemon_list.append(Pokemon(pokemon, pokemon_hashmap[pokemon], pokemon_hashmap[pokemon]))
+    
+def loading_animation():
+    print ("Loading", end="")
+    for _ in range(3):  
+        print(".", end="")
+        time.sleep(1)
+    print("")
 
-def remove_pokemon(name: str, pokemon_list: list):
-    i = 0
-    for pokemon_object in pokemon_list:
-        if pokemon_object.name == name:
-            pokemon_list.pop(i)
-        i += 1
+history = []
 
 select_character = True
 win = 0
-lost = 0
-
+lose = 0
+battle_number = 0
 print("")
 while True:
+    
+    # checks if the user chose to select a new pokemon
     if select_character:
-        print("your available pokemon")
-        for pokemon_object in user_pokemon_list:
-            print(f"Name: {pokemon_object.name} ---------- Power: {pokemon_object.current_power}")
-        user_pokemon = input("choose your pokemon: ").lower()
+        print(colored("Your Available Pokemons: ", "yellow", attrs=["bold"]))
+        # Create data for the table
+        table_data = [[colored(pokemon_object.name.capitalize(), "yellow"), colored(pokemon_object.current_power, "blue"), colored("Alive", "green") if pokemon_object.current_power != 0 else colored("Dead", "red")] for pokemon_object in user_pokemon_list]
+        
+        # Print the table with headers
+        print(tabulate(table_data, headers=[colored("Name", attrs=["bold"]), colored("Current Power", attrs=["bold"]), colored("State", attrs=["bold"])], tablefmt="grid"))
+        user_pokemon = input(colored("Choose your pokemon: ", "yellow", attrs=["bold"])).lower()
         print("")
 
+    # checks if the chosen pokemon is valid
     if user_pokemon in pokemon_hashmap.keys():
 
         for pokemon_object in user_pokemon_list:
@@ -59,84 +76,142 @@ while True:
 
                 # attach your chosen pokemon to the object
                 user_pokemon_object = pokemon_object
+        
+        # checks if the chosen pokemon is not dead
+        if user_pokemon_object.current_power != 0:
+                
+            user_random_variation = random.choice(["weak", "strong"])
+            print(f"you selected a {colored(user_random_variation, attrs=['bold', 'underline'])} {colored(user_pokemon_object.name.capitalize(), 'yellow', attrs=['bold'])}")
+            
+            if user_random_variation == "weak":
+                print (f"{colored(user_pokemon_object.name.capitalize(), 'yellow')}'s current power will be {colored('halved', 'red')}")
+                print (f"{user_pokemon_object.current_power} / 2 = {colored(user_pokemon_object.calculate_power('weak'), 'blue')}")
+            else:
+                print (f"{colored(user_pokemon_object.name.capitalize(), 'yellow')}'s current power will be {colored('doubled', 'green')}")
+                print (f"{user_pokemon_object.current_power} x 2 = {colored(user_pokemon_object.calculate_power('strong'), 'blue')}")
 
-        user_random_variation = random.choice(["weak", "strong"])
-        if user_random_variation == "weak":
-            user_random_variation_buff = random.choice(list(range(1, 21)))
-            print(user_random_variation_buff)
-        else:
-            user_random_variation_buff = random.choice(list(range(21, 41)))
+            print("")
+            time.sleep(1)
 
-        print(f"you selected a {user_random_variation} {user_pokemon_object.name}")
-        print(f"Base Power: {user_pokemon_object.initial_power}")
-        print(f"Random Variation Buff: {user_random_variation_buff}")
-        print(f"Current Power: {user_pokemon_object.add_power(user_random_variation_buff)}")
-        print("")
+            # random enemy choice pokemon
+            enemy_pokemon_object = random.choice(enemy_pokemon_list)
+            enemy_random_variation = random.choice(["weak", "strong"])
+            
+            print(f"{colored('Enemy', 'red')} selected a {colored(enemy_random_variation, attrs=['bold', 'underline'])} {colored(enemy_pokemon_object.name.capitalize(), 'yellow', attrs=['bold'])}")
+            if enemy_random_variation == "weak":
+                print (f"{colored(enemy_pokemon_object.name.capitalize(), 'yellow')}'s current power will be {colored('halved', 'red')}")
+                print (f"{enemy_pokemon_object.current_power} / 2 = {colored(enemy_pokemon_object.calculate_power('weak'), 'blue')}")
+            else:
+                print (f"{colored(enemy_pokemon_object.name.capitalize(), 'yellow')}'s current power will be {colored('doubled', 'green')}")
+                print (f"{enemy_pokemon_object.current_power} x 2 = {colored(enemy_pokemon_object.calculate_power('strong'), 'blue')}")
 
-        # random enemy choice pokemon
-        enemy_pokemon_object = random.choice(enemy_pokemon_list)
-        enemy_random_variation = random.choice(["weak", "strong"])
-        if enemy_random_variation == "weak":
-            enemy_random_variation_buff = random.choice(list(range(10, 21)))
-        else:
-            enemy_random_variation_buff = random.choice(list(range(21, 31)))
-
-        print(f"Enemy selected a {enemy_random_variation} {enemy_pokemon_object.name}")
-        print(f"Base Power: {enemy_pokemon_object.initial_power}")
-        print(f"Random Variation Buff: {enemy_random_variation_buff}")
-        print(f"Current Power: {enemy_pokemon_object.add_power(enemy_random_variation_buff)}")
-        print("")
-
-        print ("Battle will start in :")
-        time.sleep(1)
-        print ("3")
-        time.sleep(1)
-        print ("2")
-        time.sleep(1)
-        print ("1")
-        print("")
-
-        # Battle starts
-        if user_pokemon_object.current_power == enemy_pokemon_object.current_power:
-            print ("its a tie!")
+            print("")
+            loading_animation()
             print("")
 
-        elif user_pokemon_object.current_power > enemy_pokemon_object.current_power:
-            user_pokemon_object.add_power(enemy_pokemon_object.current_power)
-            enemy_pokemon_object.dead()
-            remove_pokemon(enemy_pokemon_object.name, enemy_pokemon_list)
-            print("you win")
-            print("")
+            # Battle starts
+            battle_number += 1
+            
+            if user_pokemon_object.current_power == enemy_pokemon_object.current_power:
+                history.append([battle_number, colored(user_pokemon_object.name.capitalize(), "yellow"), colored(user_pokemon_object.current_power, "blue"), colored(enemy_pokemon_object.name.capitalize(), "yellow"), colored(enemy_pokemon_object.current_power, "blue"), colored("Tie", 'yellow')])
+                print ("its a tie!")
+                print("")
+                
+                while True:
+                    print ("What do you want to do next?")
+                    print(f"Press {colored('c', 'green')} to continue the battle\nPress {colored('n', 'yellow')} for a new pokemon character selection\nPress {colored('m', 'blue')} for match history\nPress {colored('x', 'red')} to quit")
+                    next = input("Enter the key: ")
+                    if next == "c":
+                        select_character = False
+                        break
+                    if next == "n":
+                        select_character = True
+                        break
+                    if next == "x":
+                        print (colored("thank you for playing!", "green", attrs=["bold"]))
+                        exit()
+                    if next == "m":
+                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="grid"))
+                        print("")
+                    else:
+                        print(colored("Not a valid key", "red"))
+                        print("")
 
-            if len(enemy_pokemon_list) == 0:
-                print('Enemy ran out of pokemon')
-                print('Congratulations, you won the pokemon battle')
+            elif user_pokemon_object.current_power > enemy_pokemon_object.current_power:
+                
+                # backend methods and functions of the user winning
+                history.append([battle_number, colored(user_pokemon_object.name.capitalize(), "yellow"), colored(user_pokemon_object.current_power, "blue"), colored(enemy_pokemon_object.name.capitalize(), "yellow"), colored(enemy_pokemon_object.current_power, "blue"), colored("User Wins", 'green')])
+                user_pokemon_object.add_power(enemy_pokemon_object.current_power)
+                enemy_pokemon_object.dead()
+                enemy_pokemon_list.remove(enemy_pokemon_object)
+                win += 1
 
-            while True:
-                out = input("press c to continue the battle or n for a new pokemon character selection: ").lower()
-                if out == "c":
-                    select_character = False
+                print(colored('Victory!', 'green', attrs=["bold"]))
+                print("")
+
+                if len(enemy_pokemon_list) == 0:
+                    print('Enemy ran out of pokemon')
+                    print('Congratulations!, you won the Pokemon battle')
                     break
-                if out == "n":
-                    select_character = True
-                    break
-                else:
-                    print("not a valid keyword")
+                
+                while True:
+                    print ("What do you want to do next?")
+                    print(f"Press {colored('c', 'green')} to continue the battle\nPress {colored('n', 'yellow')} for a new pokemon character selection\nPress {colored('m', 'blue')} for match history\nPress {colored('x', 'red')} to quit")
+                    next = input("Enter the key: ")
+                    if next == "c":
+                        select_character = False
+                        break
+                    if next == "n":
+                        select_character = True
+                        break
+                    if next == "x":
+                        print (colored("thank you for playing!", "green", attrs=["bold"]))
+                        exit()
+                    if next == "m":
+                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="grid"))
+                        print("")
+                    else:
+                        print(colored("Not a valid key", "red"))
+                        print("")
 
+            else:
+                history.append([battle_number, colored(user_pokemon_object.name.capitalize(), "yellow"), colored(user_pokemon_object.current_power, "blue"), colored(enemy_pokemon_object.name.capitalize(), "yellow"), colored(enemy_pokemon_object.current_power, "blue"), colored("Computer Wins", 'red')])
+                enemy_pokemon_object.add_power(user_pokemon_object.current_power)
+                user_pokemon_object.dead()
+                select_character = True
+                lose += 1
+                
+                print(colored('Defeat!', 'red', attrs=['bold']))
+                print("")
+
+                if len(user_pokemon_list) == lose:
+                    print('You ran out of pokemon')
+                    print('You entirely lost the Pokemon battle')
+
+                while True:
+                    print ("What do you want to do next?")
+                    print(f"Press {colored('n', 'yellow')} for a new pokemon character selection\nPress {colored('m', 'blue')} for match history\nPress {colored('x', 'red')} to quit")
+                    next = input("Enter the key: ")
+                    if next == "n":
+                        select_character = True
+                        break
+                    if next == "x":
+                        print (colored("thank you for playing!", "green", attrs=["bold"]))
+                        exit()
+                    if next == "m":
+                        print(tabulate(history, headers=["Battle Number", "User's Pokemon", "User's Power", "Computer's Pokemon", "Computer's Power", "Status"], tablefmt="grid"))
+                        print("")
+                    else:
+                        print(colored("Not a valid key", "red"))
+                        print("")
+    
         else:
-            enemy_pokemon_object.add_power(user_pokemon_object.current_power)
-            user_pokemon_object.dead()
-            remove_pokemon(user_pokemon_object.name, user_pokemon_list)
-            print("you lost")
-            print("")
-
-            if len(user_pokemon_list) == 0:
-                print('U ran out of pokemon')
-                print('U lost the pokemon battle')
-
-            # u lost, automatically u need to choose new pokemon
+            print (f"{colored(user_pokemon_object.name.capitalize(), 'yellow')} is already dead, please choose another Pokemon")
 
     else:
-        print ("Invalid input")
-        print (user_pokemon, "not in the pokemon list")
-
+        
+        if user_pokemon == "":
+            print("No selection made")
+        else:
+            print ("Invalid Invalid input selection")
+            print ({colored(user_pokemon, 'yellow')}, "not in the pokemon list")
